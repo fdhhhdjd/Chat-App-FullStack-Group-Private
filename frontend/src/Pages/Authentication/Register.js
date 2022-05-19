@@ -104,7 +104,7 @@ const Signup = () => {
     if (pics.type === "image/jpeg" || pics.type === "image/png") {
       const data = new FormData();
       data.append("file", pics);
-      data.append("upload_preset", "llfemrxg");
+      data.append("upload_preset", process.env.REACT_APP_KEY_CLOUDINARY);
       fetch("https://api.cloudinary.com/v1_1/taithinhnam/image/upload", {
         method: "post",
         body: data,
