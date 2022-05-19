@@ -1,8 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import { Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import { HomePage, ChatPage } from "./Imports/index";
 import "./App.css";
+import {
+  ChatPage,
+  HomePage,
+  PrivateRoute,
+  PrivateRouteAuth,
+} from "./Imports/index";
 
 function App() {
   return (
@@ -10,8 +15,12 @@ function App() {
       <ToastContainer position="top-center" />
       <div className="App">
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/chats" element={<ChatPage />} />
+          <Route element={<PrivateRouteAuth />}>
+            <Route path="/" element={<HomePage />} />
+          </Route>
+          <Route element={<PrivateRoute />}>
+            <Route path="/chats" element={<ChatPage />} />
+          </Route>
         </Routes>
       </div>
     </React.Fragment>

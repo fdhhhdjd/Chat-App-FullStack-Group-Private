@@ -8,11 +8,13 @@ export const LoginRoute = `${host}/api/auth/login`;
 ////!logout
 export const LogoutRoute = `${host}/logout`;
 
-//!set Avatar
-export const SetAVatarRoute = `${host}/api/auth/setavatar`;
+//!Search User
+export const SearchRoute = `${host}/api/auth?search=`;
 
-//!Get profile
-export const GetProfileRoute = `${host}/api/auth/getall`;
+//* Message
+
+//!Fetch Chat Group
+export const FetchChatRoute = `${host}/api/group/fetch`;
 
 //!Get Message
 export const GetMessageRoute = `${host}/api/message/getmessage`;

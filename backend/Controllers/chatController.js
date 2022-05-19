@@ -131,7 +131,11 @@ const chatCtrl = {
             path: "latestMessage.sender",
             select: "name pic email",
           });
-          res.status(200).send(results);
+          res.status(200).json({
+            status: 200,
+            msg: "success",
+            results,
+          });
         });
     } catch (error) {
       res.status(400).json({

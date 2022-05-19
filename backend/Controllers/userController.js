@@ -89,7 +89,14 @@ const userCtrl = {
               status: 200,
               success: true,
               accesstoken,
-              user,
+              user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                isAdmin: user.isAdmin,
+                pic: user.pic,
+                token: accesstoken,
+              },
             });
           } else {
             return res.json({

@@ -21,28 +21,26 @@ export const SendMessageInitial = createAsyncThunk(
     return response.data;
   }
 );
+export const FetchChatInitial = createAsyncThunk(
+  "Auth/FetchChat",
+  async ({ FetchChatRoute, token }) => {
+    const response = await axios.get(`${FetchChatRoute}`, {
+      headers: { Authorization: token },
+    });
+    return response.data;
+  }
+);
 const initialState = {
   loading: false,
   error: null,
   message: [],
+  Message: [],
   sendMessage: [],
 };
 const AuthenticationSlice = createSlice({
   name: "Auth",
   initialState,
-  reducers: {
-    resetNotify: (state, { payload }) => {
-      console.log(state, "-----", payload);
-      delete state.newMessage[payload];
-    },
-    AddNotify: (state, { payload }) => {
-      if (state.newMessage[payload]) {
-        state.newMessage[payload] = state.newMessage[payload] + 1;
-      } else {
-        state.newMessage[payload] = 1;
-      }
-    },
-  },
+  reducers: {},
   extraReducers: {
     //? Get Message
     [GetMessageInitial.pending]: (state, action) => {
@@ -65,6 +63,18 @@ const AuthenticationSlice = createSlice({
       state.sendMessage = action.payload;
     },
     [SendMessageInitial.rejected]: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    //?  Fetch Message
+    [FetchChatInitial.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [FetchChatInitial.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.Message = action.payload;
+    },
+    [FetchChatInitial.rejected]: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },

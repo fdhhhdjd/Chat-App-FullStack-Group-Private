@@ -20,13 +20,7 @@ export const LoginInitial = createAsyncThunk(
     return response.data;
   }
 );
-// export const LogoutInitial = createAsyncThunk(
-//   "Auth/Logout",
-//   async ({ LogoutRoute, id }) => {
-//     const response = await axios.get(`${LogoutRoute}/${id}`);
-//     return response.data;
-//   }
-// );
+
 export const LogoutInitial = createAsyncThunk(
   "Auth/Logout",
   async ({ LogoutRoute, user }) => {
@@ -36,10 +30,20 @@ export const LogoutInitial = createAsyncThunk(
     return response.data;
   }
 );
+export const SearchInitial = createAsyncThunk(
+  "Auth/Search",
+  async ({ SearchRoute, search, token }) => {
+    const response = await axios.get(`${SearchRoute}${search}`, {
+      headers: { Authorization: token },
+    });
+    return response.data;
+  }
+);
 const initialState = {
   loadings: false,
   error: null,
   Auth: [],
+  searchUser: [],
 };
 const AuthSlice = createSlice({
   name: "Auth",
@@ -91,6 +95,18 @@ const AuthSlice = createSlice({
       state.auth = action.payload;
     },
     [LogoutInitial.rejected]: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    //?Search
+    [SearchInitial.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [SearchInitial.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.searchUser = action.payload;
+    },
+    [SearchInitial.rejected]: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },
