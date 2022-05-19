@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useMyContext } from "../../useContext/GlobalState";
 import { Box } from "@chakra-ui/layout";
-import { SideDrawer, MyChats } from "../../Imports/index";
+import { SideDrawer, MyChats, ChatBox } from "../../Imports/index";
 const ChatPage = () => {
   const [fetchAgain, setFetchAgain] = useState(false);
   const { user } = useMyContext();
@@ -17,9 +17,9 @@ const ChatPage = () => {
           p="10px"
         >
           {user && <MyChats fetchAgain={fetchAgain} />}
-          {/* {user && (
-            <Chatbox fetchAgain={fetchAgain} setFetchAgain={setFetchAgain} />
-          )} */}
+          {user && (
+            <ChatBox fetchAgain={fetchAgain} setFetchAgain={setFetchAgain} />
+          )}
         </Box>
       </div>
     </React.Fragment>

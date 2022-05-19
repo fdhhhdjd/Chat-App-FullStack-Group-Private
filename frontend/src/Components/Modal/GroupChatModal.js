@@ -17,10 +17,15 @@ import axios from "axios";
 import { useState } from "react";
 import { useMyContext } from "../../useContext/GlobalState";
 import { UserBadgeItem, UserListItem } from "../../Imports/index";
+import { useDispatch } from "react-redux";
+import { CreateGroupChatInitial } from "../../Redux/GroupSlice";
+import { SearchInitial } from "../../Redux/AuthSlice";
+import { CreateGroupChatRoute, SearchRoute } from "../../utils/ApiRoutes";
 const GroupChatModal = ({ children }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [groupChatName, setGroupChatName] = useState();
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const dispatch = useDispatch();
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -28,11 +33,111 @@ const GroupChatModal = ({ children }) => {
 
   const { user, chats, setChats } = useMyContext();
 
-  const handleGroup = (userToAdd) => {};
+  const handleGroup = (userToAdd) => {
+    if (selectedUsers.includes(userToAdd)) {
+      toast({
+        title: "User already added",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+        position: "top",
+      });
+      return;
+    }
+    setSelectedUsers([...selectedUsers, userToAdd]);
+  };
 
-  const handleSearch = async (query) => {};
-  const handleDelete = (delUser) => {};
-  const handleSubmit = async () => {};
+  const handleSearch = async (query) => {
+    setSearch(query);
+    if (!query) {
+      return;
+    }
+    try {
+      let token = user.token;
+      setLoading(true);
+      dispatch(SearchInitial({ SearchRoute, search, token }))
+        .then((data) => {
+          if (data?.payload?.status === 200) {
+            setLoading(false);
+            setSearchResult(data?.payload?.users);
+          }
+        })
+        .catch((error) => {
+          toast({
+            title: "Error Occured!",
+            description: "Failed to Load the Search Results",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "bottom-left",
+          });
+        });
+    } catch (error) {
+      toast({
+        title: "Error Occured!",
+        description: "Failed to Load the Search Results",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+    }
+  };
+  const handleDelete = (delUser) => {
+    setSelectedUsers(selectedUsers.filter((user) => user._id !== delUser._id));
+  };
+  const handleSubmitCreateGroup = async () => {
+    if (!groupChatName || !selectedUsers) {
+      toast({
+        title: "Please fill all the feilds",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+        position: "top",
+      });
+      return;
+    }
+    try {
+      let name = groupChatName;
+      let users = JSON.stringify(selectedUsers.map((u) => u._id));
+      let token = user.token;
+      dispatch(
+        CreateGroupChatInitial({ CreateGroupChatRoute, name, users, token })
+      )
+        .then((data) => {
+          if (data?.payload?.status === 200) {
+            setChats([data, ...chats]);
+            onClose();
+            toast({
+              title: "New Group Chat Created!",
+              status: "success",
+              duration: 5000,
+              isClosable: true,
+              position: "bottom",
+            });
+          }
+        })
+        .catch((error) => {
+          toast({
+            title: "Failed to Create the Chat!",
+            description: error.response.data,
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "bottom",
+          });
+        });
+    } catch (error) {
+      toast({
+        title: "Failed to Create the Chat!",
+        description: error.response.data,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+    }
+  };
 
   return (
     <>
@@ -60,7 +165,7 @@ const GroupChatModal = ({ children }) => {
             </FormControl>
             <FormControl>
               <Input
-                placeholder="Add Users eg: John, Piyush, Jane"
+                placeholder="Add Users eg: Tai, Thinh, Nam,Tat"
                 mb={1}
                 onChange={(e) => handleSearch(e.target.value)}
               />
@@ -90,7 +195,7 @@ const GroupChatModal = ({ children }) => {
             )}
           </ModalBody>
           <ModalFooter>
-            <Button onClick={handleSubmit} colorScheme="blue">
+            <Button onClick={handleSubmitCreateGroup} colorScheme="blue">
               Create Chat
             </Button>
           </ModalFooter>

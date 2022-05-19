@@ -92,6 +92,8 @@ const chatCtrl = {
   },
   RemoveFromGroup: async (req, res, next) => {
     //pull xoa phan tu khoi mang
+    const { chatId, userId } = req.body;
+
     const removed = await Chats.findByIdAndUpdate(
       chatId,
       {

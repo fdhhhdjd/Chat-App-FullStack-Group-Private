@@ -84,7 +84,6 @@ function SideDrawer({ user }) {
   };
 
   const accessChat = async (userId) => {};
-  console.log(searchResult);
   return (
     <>
       <Box

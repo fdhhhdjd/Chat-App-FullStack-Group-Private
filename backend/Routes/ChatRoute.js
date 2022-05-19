@@ -17,6 +17,6 @@ router.put("/groupremove", Auth, chatCtrl.RemoveFromGroup);
 router.get("/fetch", Auth, chatCtrl.fetchChats);
 
 //Access user to Group
-router.post("/fetch", Auth, chatCtrl.accessChat);
+router.post("/access", Auth, chatCtrl.accessChat);
 
 module.exports = router;
