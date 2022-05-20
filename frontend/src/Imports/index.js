@@ -18,6 +18,9 @@ export { default as PrivateRoute } from "../Pages/PrivateRouteAuth/PrivateRoute"
 export { default as LoadingToRedirects } from "../Pages/PrivateRouteAuth/LoadingToRedirects";
 export { default as LoadingToRedirect } from "../Pages/PrivateRouteAuth/LoadingToRedirect";
 
+//!Custom Hook
+export { default as useDebounce } from "../Pages/UseHooks/useDebounce";
+
 //!Component
 export { default as SideDrawer } from "../Components/SideDrawer";
 export { default as ChatLoading } from "../Components/ChatLoading";

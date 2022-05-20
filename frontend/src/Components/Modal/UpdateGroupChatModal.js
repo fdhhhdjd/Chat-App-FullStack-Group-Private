@@ -17,9 +17,9 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 import axios from "axios";
-import { useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { UserBadgeItem, UserListItem } from "../../Imports/index";
+import { useDebounce, UserBadgeItem, UserListItem } from "../../Imports/index";
 import { SearchInitial } from "../../Redux/AuthSlice";
 import { RemoveGroupInitial, RenameGroupInitial } from "../../Redux/GroupSlice";
 import { useMyContext } from "../../useContext/GlobalState";
@@ -39,45 +39,11 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
   const toast = useToast();
 
   const { selectedChat, setSelectedChat, user } = useMyContext();
-
-  const handleSearch = async (query) => {
-    setSearch(query);
-    if (!query) {
-      return;
-    }
-    try {
-      setLoading(true);
-      let token = user.token;
-      dispatch(SearchInitial({ SearchRoute, search, token }))
-        .then((data) => {
-          if (data?.payload?.status === 200) {
-            setLoading(false);
-            setSearchResult(data?.payload?.users);
-          }
-        })
-        .catch((error) => {
-          toast({
-            title: "Error Occured!",
-            description: "Failed to Load the Search Results",
-            status: "error",
-            duration: 5000,
-            isClosable: true,
-            position: "bottom-left",
-          });
-        });
-    } catch (error) {
-      toast({
-        title: "Error Occured!",
-        description: "Failed to Load the Search Results",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-        position: "bottom-left",
-      });
-      setLoading(false);
-    }
+  const debouncedValue = useDebounce(search, 500);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setGroupChatName({ ...groupChatName, [name]: value });
   };
-
   const handleRename = async () => {
     if (!groupChatName) return;
 
@@ -228,7 +194,44 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
     }
     setGroupChatName("");
   };
-
+  useEffect(() => {
+    if (!debouncedValue) {
+      return;
+    }
+    try {
+      setLoading(true);
+      let token = user.token;
+      dispatch(SearchInitial({ SearchRoute, search: debouncedValue, token }))
+        .then((data) => {
+          if (data?.payload?.status === 200) {
+            setLoading(false);
+            setSearchResult(data?.payload?.users);
+          }
+        })
+        .catch((error) => {
+          toast({
+            title: "Error Occured!",
+            description: "Failed to Load the Search Results",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "bottom-left",
+          });
+        });
+    } catch (error) {
+      toast({
+        title: "Error Occured!",
+        description: "Failed to Load the Search Results",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+      setLoading(false);
+    }
+  }, [debouncedValue]);
+  useEffect(() => {});
+  console.log(selectedChat);
   return (
     <>
       <IconButton d={{ base: "flex" }} icon={<ViewIcon />} onClick={onOpen} />
@@ -262,7 +265,8 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
                 placeholder="Chat Name"
                 mb={3}
                 value={groupChatName}
-                onChange={(e) => setGroupChatName(e.target.value)}
+                name="groupChatName"
+                onChange={handleChange}
               />
               <Button
                 variant="solid"
@@ -278,7 +282,7 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
               <Input
                 placeholder="Add User to group"
                 mb={1}
-                onChange={(e) => handleSearch(e.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
               />
             </FormControl>
 

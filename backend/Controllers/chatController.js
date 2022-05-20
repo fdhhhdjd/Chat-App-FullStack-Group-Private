@@ -5,6 +5,15 @@ const chatCtrl = {
     if (!req.body.users || !req.body.name) {
       return res.status(400).send({ message: "Please Fill all the feilds" });
     }
+    const Group = await Chats.findOne({ chatName: req.body.name });
+    if (Group) {
+      return res.json({
+        status: 400,
+        success: false,
+        msg: "The Group already exists.",
+      });
+    }
+
     var users = JSON.parse(req.body.users);
 
     if (users.length < 2) {

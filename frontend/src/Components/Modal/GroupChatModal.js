@@ -14,10 +14,10 @@ import {
   Box,
 } from "@chakra-ui/react";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMyContext } from "../../useContext/GlobalState";
-import { UserBadgeItem, UserListItem } from "../../Imports/index";
-import { useDispatch } from "react-redux";
+import { UserBadgeItem, UserListItem, useDebounce } from "../../Imports/index";
+import { useDispatch, useSelector } from "react-redux";
 import { CreateGroupChatInitial } from "../../Redux/GroupSlice";
 import { SearchInitial } from "../../Redux/AuthSlice";
 import { CreateGroupChatRoute, SearchRoute } from "../../utils/ApiRoutes";
@@ -32,7 +32,8 @@ const GroupChatModal = ({ children }) => {
   const toast = useToast();
 
   const { user, chats, setChats } = useMyContext();
-
+  const debouncedValue = useDebounce(search, 500);
+  const { CreateGroup } = useSelector((state) => state.group);
   const handleGroup = (userToAdd) => {
     if (selectedUsers.includes(userToAdd)) {
       toast({
@@ -55,7 +56,7 @@ const GroupChatModal = ({ children }) => {
     try {
       let token = user.token;
       setLoading(true);
-      dispatch(SearchInitial({ SearchRoute, search, token }))
+      dispatch(SearchInitial({ SearchRoute, search: debouncedValue, token }))
         .then((data) => {
           if (data?.payload?.status === 200) {
             setLoading(false);
