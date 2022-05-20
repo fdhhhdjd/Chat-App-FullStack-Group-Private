@@ -18,32 +18,35 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useCallback, useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useDebounce, UserBadgeItem, UserListItem } from "../../Imports/index";
 import { SearchInitial } from "../../Redux/AuthSlice";
-import { RemoveGroupInitial, RenameGroupInitial } from "../../Redux/GroupSlice";
+import {
+  RemoveGroupInitial,
+  RenameGroupInitial,
+  reset,
+} from "../../Redux/GroupSlice";
 import { useMyContext } from "../../useContext/GlobalState";
 import {
   SearchRoute,
   RenameGroupChatRoute,
   RemoveFromGroup,
 } from "../../utils/ApiRoutes";
+
 const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onOpen, onClose, closeOnOverlayClick } = useDisclosure();
   const dispatch = useDispatch();
   const [groupChatName, setGroupChatName] = useState();
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
+  const { RenameGroup } = useSelector((state) => state.group);
+
   const [loading, setLoading] = useState(false);
   const [renameloading, setRenameLoading] = useState(false);
   const toast = useToast();
 
   const { selectedChat, setSelectedChat, user } = useMyContext();
   const debouncedValue = useDebounce(search, 500);
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setGroupChatName({ ...groupChatName, [name]: value });
-  };
   const handleRename = async () => {
     if (!groupChatName) return;
 
@@ -230,12 +233,20 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
       setLoading(false);
     }
   }, [debouncedValue]);
-  useEffect(() => {});
-  console.log(selectedChat);
+  useEffect(() => {
+    setGroupChatName(selectedChat.chatName);
+  }, [selectedChat]);
+  useEffect(() => {
+    if (RenameGroup.status === 200) {
+      const HandleReset = setTimeout(() => {
+        dispatch(reset());
+      }, 800);
+      return () => clearTimeout(HandleReset);
+    }
+  }, [RenameGroup]);
   return (
     <>
       <IconButton d={{ base: "flex" }} icon={<ViewIcon />} onClick={onOpen} />
-
       <Modal onClose={onClose} isOpen={isOpen} isCentered>
         <ModalOverlay />
         <ModalContent>
@@ -266,7 +277,7 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
                 mb={3}
                 value={groupChatName}
                 name="groupChatName"
-                onChange={handleChange}
+                onChange={(e) => setGroupChatName(e.target.value)}
               />
               <Button
                 variant="solid"

@@ -17,7 +17,7 @@ const LoadingToRedirects = () => {
     }, 1000);
     count === 0 &&
       navigate("/chats", { replace: true, state: { from: location } });
-    count === 0 && toast.info(`Please Logout Account ${user?.full_name} 🤔`);
+    count === 0 && toast.info(`Please Logout Account ${user?.name} 🤔`);
     return () => clearInterval(interval);
   }, [count, navigate, user]);
 

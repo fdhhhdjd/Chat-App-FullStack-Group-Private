@@ -75,7 +75,12 @@ const initialState = {
 const GroupSlice = createSlice({
   name: "Group",
   initialState,
-  reducers: {},
+  reducers: {
+    reset: (state) => {
+      state.CreateGroup = [];
+      state.RenameGroup = [];
+    },
+  },
   extraReducers: {
     //?  Create Group
     [CreateGroupChatInitial.pending]: (state, action) => {

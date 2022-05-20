@@ -9,11 +9,13 @@ import { useMyContext } from "../useContext/GlobalState";
 import { GroupChatModal } from "../Imports/index";
 import { getSender } from "../Configs/ChatLogics";
 import { FetchChatInitial } from "../Redux/MessageSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { FetchChatRoute } from "../utils/ApiRoutes";
 const MyChats = ({ fetchAgain }) => {
   const [loggedUser, setLoggedUser] = useState();
   const dispatch = useDispatch();
+  const { CreateGroup } = useSelector((state) => state.group);
+
   const { selectedChat, setSelectedChat, user, chats, setChats } =
     useMyContext();
   const toast = useToast();
@@ -47,11 +49,10 @@ const MyChats = ({ fetchAgain }) => {
       });
     }
   };
-
   useEffect(() => {
     setLoggedUser(JSON.parse(localStorage.getItem("userInfo")));
     fetchChats();
-  }, [fetchAgain]);
+  }, [fetchAgain, CreateGroup]);
 
   return (
     <Box

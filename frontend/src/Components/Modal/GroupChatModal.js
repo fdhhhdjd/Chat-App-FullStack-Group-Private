@@ -34,6 +34,7 @@ const GroupChatModal = ({ children }) => {
   const { user, chats, setChats } = useMyContext();
   const debouncedValue = useDebounce(search, 500);
   const { CreateGroup } = useSelector((state) => state.group);
+
   const handleGroup = (userToAdd) => {
     if (selectedUsers.includes(userToAdd)) {
       toast({
@@ -48,42 +49,6 @@ const GroupChatModal = ({ children }) => {
     setSelectedUsers([...selectedUsers, userToAdd]);
   };
 
-  const handleSearch = async (query) => {
-    setSearch(query);
-    if (!query) {
-      return;
-    }
-    try {
-      let token = user.token;
-      setLoading(true);
-      dispatch(SearchInitial({ SearchRoute, search: debouncedValue, token }))
-        .then((data) => {
-          if (data?.payload?.status === 200) {
-            setLoading(false);
-            setSearchResult(data?.payload?.users);
-          }
-        })
-        .catch((error) => {
-          toast({
-            title: "Error Occured!",
-            description: "Failed to Load the Search Results",
-            status: "error",
-            duration: 5000,
-            isClosable: true,
-            position: "bottom-left",
-          });
-        });
-    } catch (error) {
-      toast({
-        title: "Error Occured!",
-        description: "Failed to Load the Search Results",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-        position: "bottom-left",
-      });
-    }
-  };
   const handleDelete = (delUser) => {
     setSelectedUsers(selectedUsers.filter((user) => user._id !== delUser._id));
   };
@@ -116,6 +81,15 @@ const GroupChatModal = ({ children }) => {
               isClosable: true,
               position: "bottom",
             });
+          } else if (data?.payload?.status === 400) {
+            toast({
+              title: "Failed to Create the Chat!",
+              description: data?.payload?.msg,
+              status: "error",
+              duration: 5000,
+              isClosable: true,
+              position: "bottom",
+            });
           }
         })
         .catch((error) => {
@@ -139,7 +113,42 @@ const GroupChatModal = ({ children }) => {
       });
     }
   };
-
+  useEffect(() => {
+    setSearch(debouncedValue);
+    if (!debouncedValue) {
+      return;
+    }
+    try {
+      let token = user.token;
+      setLoading(true);
+      dispatch(SearchInitial({ SearchRoute, search: debouncedValue, token }))
+        .then((data) => {
+          if (data?.payload?.status === 200) {
+            setLoading(false);
+            setSearchResult(data?.payload?.users);
+          }
+        })
+        .catch((error) => {
+          toast({
+            title: "Error Occured!",
+            description: "Failed to Load the Search Results",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "bottom-left",
+          });
+        });
+    } catch (error) {
+      toast({
+        title: "Error Occured!",
+        description: "Failed to Load the Search Results",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+    }
+  }, [debouncedValue]);
   return (
     <>
       <span onClick={onOpen}>{children}</span>
@@ -168,7 +177,7 @@ const GroupChatModal = ({ children }) => {
               <Input
                 placeholder="Add Users eg: Tai, Thinh, Nam,Tat"
                 mb={1}
-                onChange={(e) => handleSearch(e.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
               />
             </FormControl>
             <Box w="100%" d="flex" flexWrap="wrap">
