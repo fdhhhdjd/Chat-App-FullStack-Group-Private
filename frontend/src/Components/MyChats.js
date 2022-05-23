@@ -4,7 +4,8 @@ import { useToast } from "@chakra-ui/toast";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import ChatLoading from "./ChatLoading";
-import { Button } from "@chakra-ui/react";
+import moment from "moment";
+import { Button, ControlBox, cookieStorageManager } from "@chakra-ui/react";
 import { useMyContext } from "../useContext/GlobalState";
 import { GroupChatModal } from "../Imports/index";
 import { getSender } from "../Configs/ChatLogics";
@@ -15,9 +16,18 @@ const MyChats = ({ fetchAgain }) => {
   const [loggedUser, setLoggedUser] = useState();
   const dispatch = useDispatch();
   const { CreateGroup } = useSelector((state) => state.group);
-
-  const { selectedChat, setSelectedChat, user, chats, setChats } =
-    useMyContext();
+  const { sendMessage } = useSelector((state) => state.message);
+  const {
+    selectedChat,
+    setSelectedChat,
+    user,
+    chats,
+    setChats,
+    notification,
+    BoldFont,
+    setBoldFont,
+    setNotification,
+  } = useMyContext();
   const toast = useToast();
   const fetchChats = async () => {
     try {
@@ -52,8 +62,7 @@ const MyChats = ({ fetchAgain }) => {
   useEffect(() => {
     setLoggedUser(JSON.parse(localStorage.getItem("userInfo")));
     fetchChats();
-  }, [fetchAgain, CreateGroup]);
-
+  }, [fetchAgain, CreateGroup, sendMessage, BoldFont]);
   return (
     <Box
       d={{ base: selectedChat ? "none" : "flex", md: "flex" }}
@@ -100,7 +109,9 @@ const MyChats = ({ fetchAgain }) => {
           <Stack overflowY="scroll">
             {chats.map((chat) => (
               <Box
-                onClick={() => setSelectedChat(chat)}
+                onClick={() => {
+                  setSelectedChat(chat);
+                }}
                 cursor="pointer"
                 bg={selectedChat === chat ? "#38B2AC" : "#E8E8E8"}
                 color={selectedChat === chat ? "white" : "black"}
@@ -112,14 +123,33 @@ const MyChats = ({ fetchAgain }) => {
                 <Text>
                   {!chat.isGroupChat
                     ? getSender(loggedUser, chat.users)
-                    : chat.chatName}
+                    : `${chat.chatName} (Group)`}
                 </Text>
                 {chat.latestMessage && (
                   <Text fontSize="xs">
                     <b>{chat.latestMessage.sender.name} : </b>
-                    {chat.latestMessage.content.length > 50
-                      ? chat.latestMessage.content.substring(0, 51) + "..."
-                      : chat.latestMessage.content}
+                    {
+                      (user.name = chat.latestMessage.sender.name
+                        ? chat.latestMessage.content.includes(
+                            "https://res.cloudinary.com/taithinhnam"
+                          )
+                          ? chat.latestMessage.content.includes(
+                              "https://res.cloudinary.com/taithinhnam/video/upload"
+                            )
+                            ? "Đã gửi 1 Video"
+                            : "Đã gửi 1 Hình ảnh"
+                          : chat.latestMessage.content.length > 50
+                          ? chat.latestMessage.content.substring(0, 20) + "..."
+                          : chat.latestMessage.content
+                        : chat.latestMessage.content.length > 50
+                        ? chat.latestMessage.content.substring(0, 20) + "..."
+                        : chat.latestMessage.content)
+                    }
+                  </Text>
+                )}
+                {chat.latestMessage && (
+                  <Text fontSize="xs">
+                    {moment(chat.latestMessage.createdAt).fromNow()}
                   </Text>
                 )}
               </Box>

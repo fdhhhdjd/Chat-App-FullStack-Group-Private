@@ -34,7 +34,7 @@ import {
 } from "../../utils/ApiRoutes";
 
 const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
-  const { isOpen, onOpen, onClose, closeOnOverlayClick } = useDisclosure();
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const dispatch = useDispatch();
   const [groupChatName, setGroupChatName] = useState();
   const [search, setSearch] = useState("");
@@ -60,9 +60,31 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
         RenameGroupInitial({ RenameGroupChatRoute, chatId, chatName, token })
       )
         .then((data) => {
-          setSelectedChat(data?.payload?.updatedChat);
-          setFetchAgain(!fetchAgain);
-          setRenameLoading(false);
+          if (data?.payload?.status === 200) {
+            if (data?.payload?.msg) {
+              toast({
+                title: "Update Group Chat !",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+                position: "bottom",
+              });
+            }
+            setSelectedChat(data?.payload?.updatedChat);
+            setFetchAgain(!fetchAgain);
+            setRenameLoading(false);
+            onClose();
+          } else if (data?.payload?.status === 400) {
+            toast({
+              title: "Error Occured!",
+              description: data?.payload?.msg,
+              status: "error",
+              duration: 5000,
+              isClosable: true,
+              position: "bottom",
+            });
+            setRenameLoading(false);
+          }
         })
         .catch((error) => {
           toast({
@@ -86,7 +108,6 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
       });
       setRenameLoading(false);
     }
-    setGroupChatName("");
   };
 
   const handleAddUser = async (user1) => {

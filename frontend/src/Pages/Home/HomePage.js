@@ -13,11 +13,6 @@ import { useNavigate } from "react-router-dom";
 import { Login, Register, MetaData } from "../../Imports/index";
 
 function Homepage() {
-  const navigate = useNavigate();
-  const [isFlag, setIsFlag] = useState(true);
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("userInfo"));
-  }, []);
   return (
     <Container maxW="xl" centerContent>
       <MetaData title="Authentication" />

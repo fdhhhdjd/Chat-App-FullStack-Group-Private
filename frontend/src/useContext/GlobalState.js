@@ -11,6 +11,9 @@ export const DataProvider = ({ children }) => {
   const [selectedChat, setSelectedChat] = useState();
   const [notification, setNotification] = useState([]);
   const [chats, setChats] = useState();
+  const [BoldFont, setBoldFont] = useState(false);
+  const [images, setImages] = useState();
+
   //
 
   useEffect(() => {
@@ -29,6 +32,10 @@ export const DataProvider = ({ children }) => {
     socket,
     SOCKET_URL,
     selectedChat,
+    BoldFont,
+    setBoldFont,
+    images,
+    setImages,
   };
   return <Store.Provider value={data}>{children}</Store.Provider>;
 };

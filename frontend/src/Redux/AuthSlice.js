@@ -20,16 +20,6 @@ export const LoginInitial = createAsyncThunk(
     return response.data;
   }
 );
-
-export const LogoutInitial = createAsyncThunk(
-  "Auth/Logout",
-  async ({ LogoutRoute, user }) => {
-    const response = await axios.post(`${LogoutRoute}`, {
-      user,
-    });
-    return response.data;
-  }
-);
 export const SearchInitial = createAsyncThunk(
   "Auth/Search",
   async ({ SearchRoute, search, token }) => {
@@ -86,18 +76,7 @@ const AuthSlice = createSlice({
       state.loadings = false;
       state.error = action.payload;
     },
-    //?Logout
-    [LogoutInitial.pending]: (state, action) => {
-      state.loading = true;
-    },
-    [LogoutInitial.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.auth = action.payload;
-    },
-    [LogoutInitial.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
+
     //?Search
     [SearchInitial.pending]: (state, action) => {
       state.loading = true;

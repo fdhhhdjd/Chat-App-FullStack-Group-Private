@@ -1,7 +1,7 @@
 import { Avatar } from "@chakra-ui/avatar";
 import { Button } from "@chakra-ui/button";
 import { useDisclosure } from "@chakra-ui/hooks";
-import { ChevronDownIcon } from "@chakra-ui/icons";
+import { BellIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { Input } from "@chakra-ui/input";
 import { Box, Text } from "@chakra-ui/layout";
 import {
@@ -21,18 +21,24 @@ import {
 import { Spinner } from "@chakra-ui/spinner";
 import { useToast } from "@chakra-ui/toast";
 import { Tooltip } from "@chakra-ui/tooltip";
-import { useContext, useState } from "react";
-import { ChatLoading, UserListItem, ProfileModal } from "../Imports/index";
-import { useMyContext } from "../useContext/GlobalState";
+import { useState } from "react";
+import NotificationBadge, { Effect } from "react-notification-badge";
 import { useDispatch } from "react-redux";
+import { getSender } from "../Configs/ChatLogics";
+import { ChatLoading, ProfileModal, UserListItem } from "../Imports/index";
 import { SearchInitial } from "../Redux/AuthSlice";
-import { SearchRoute } from "../utils/ApiRoutes";
+import { AccessUserToGroupInitial } from "../Redux/GroupSlice";
+import { useMyContext } from "../useContext/GlobalState";
+import { SearchRoute, AccessUserToGroupRoute } from "../utils/ApiRoutes";
+
 function SideDrawer({ user }) {
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState(false);
   const dispatch = useDispatch();
+  const { setSelectedChat, notification, setNotification, chats, setChats } =
+    useMyContext();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const logoutHandler = () => {
@@ -82,8 +88,31 @@ function SideDrawer({ user }) {
       });
     }
   };
-
-  const accessChat = async (userId) => {};
+  const accessChat = async (userId) => {
+    try {
+      setLoadingChat(true);
+      let token = user.token;
+      dispatch(
+        AccessUserToGroupInitial({ AccessUserToGroupRoute, userId, token })
+      ).then((data) => {
+        console.log(data, "data");
+        if (!chats.find((c) => c._id === data?.payload?._id))
+          setChats([data?.payload, ...chats]);
+        setSelectedChat(data?.payload);
+        setLoadingChat(false);
+        onClose();
+      });
+    } catch (error) {
+      toast({
+        title: "Error fetching the chat",
+        description: error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+    }
+  };
   return (
     <>
       <Box
@@ -107,7 +136,7 @@ function SideDrawer({ user }) {
           Talk-A-Tive
         </Text>
         <div>
-          {/* <Menu>
+          <Menu>
             <MenuButton p={1}>
               <NotificationBadge
                 count={notification.length}
@@ -131,7 +160,7 @@ function SideDrawer({ user }) {
                 </MenuItem>
               ))}
             </MenuList>
-          </Menu> */}
+          </Menu>
           <Menu>
             <MenuButton as={Button} bg="white" rightIcon={<ChevronDownIcon />}>
               <Avatar

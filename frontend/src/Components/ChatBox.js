@@ -5,7 +5,6 @@ import { useMyContext } from "../useContext/GlobalState";
 
 const ChatBox = ({ fetchAgain, setFetchAgain }) => {
   const { selectedChat } = useMyContext();
-
   return (
     <Box
       d={{ base: selectedChat ? "flex" : "none", md: "flex" }}

@@ -16,7 +16,7 @@ export const SearchRoute = `${host}/api/auth?search=`;
 
 //* Message
 //!All Messages
-export const MessageGetAll = `${host}/api/message/:id`;
+export const MessageGetAll = `${host}/api/message`;
 
 //! Send Message
 export const SendMessage = `${host}/api/message/send`;
@@ -39,3 +39,6 @@ export const RemoveFromGroup = `${host}/api/group/groupremove`;
 
 //!Access user to Group
 export const AccessUserToGroupRoute = `${host}/api/group/access`;
+
+//!Upload Image Or Video
+export const UploadVideoOrImage = `${host}/api/upload/uploadImg`;

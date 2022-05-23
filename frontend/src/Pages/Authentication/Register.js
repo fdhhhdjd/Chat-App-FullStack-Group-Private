@@ -29,7 +29,7 @@ const Signup = () => {
   };
   const submitHandler = async () => {
     setPicLoading(true);
-    if (!name || !email || !password || !confirmpassword) {
+    if (!name || !email || !password || !confirmpassword || !pic) {
       toast({
         title: "Please Fill all the Feilds",
         status: "warning",
@@ -61,6 +61,13 @@ const Signup = () => {
               isClosable: true,
               position: "bottom",
             });
+            setState({
+              name: "",
+              email: "",
+              password: "",
+              confirmpassword: "",
+            });
+            setPic("");
             setPicLoading(false);
           } else {
             toast({

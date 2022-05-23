@@ -81,6 +81,7 @@ const GroupChatModal = ({ children }) => {
               isClosable: true,
               position: "bottom",
             });
+            onClose();
           } else if (data?.payload?.status === 400) {
             toast({
               title: "Failed to Create the Chat!",
@@ -152,7 +153,6 @@ const GroupChatModal = ({ children }) => {
   return (
     <>
       <span onClick={onOpen}>{children}</span>
-
       <Modal onClose={onClose} isOpen={isOpen} isCentered>
         <ModalOverlay />
         <ModalContent>

@@ -17,10 +17,9 @@ const MessageCtrl = {
 
   SendMessage: async (req, res, next) => {
     const { content, chatId } = req.body;
-
     if (!content || !chatId) {
       console.log("Invalid data passed into request");
-      return res.sendStatus(400);
+      return res.json({ status: 400, msg: "Invalid data passed into request" });
     }
 
     var newMessage = {
@@ -28,25 +27,22 @@ const MessageCtrl = {
       content: content,
       chat: chatId,
     };
-
     try {
       var message = await Messages.create(newMessage);
-
-      message = await message.populate("sender", "name pic").execPopulate();
-      message = await message.populate("chat").execPopulate();
+      message = await message.populate("sender", "name pic");
+      message = await message.populate("chat");
       message = await Users.populate(message, {
         path: "chat.users",
         select: "name pic email",
       });
-
       await Chats.findByIdAndUpdate(req.body.chatId, {
         latestMessage: message,
       });
-
       res.json(message);
     } catch (error) {
-      res.status(400);
-      throw new Error(error.message);
+      res.status(400).json({
+        msg: error.message,
+      });
     }
   },
 };

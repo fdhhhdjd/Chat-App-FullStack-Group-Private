@@ -44,27 +44,49 @@ const chatCtrl = {
   },
   RenameFromGroup: async (req, res, next) => {
     const { chatId, chatName } = req.body;
+    const Group = await Chats.findOne({ chatName });
 
-    const updatedChat = await Chats.findByIdAndUpdate(
-      chatId,
-      {
-        chatName: chatName,
-      },
-      {
-        new: true,
-      }
-    )
-      .populate("users", "-password")
-      .populate("groupAdmin", "-password");
-
-    if (!updatedChat) {
-      res.json({
-        status: 400,
-        success: false,
-        msg: "Chat Not Found",
+    if (Group != null) {
+      res.status(200).json({
+        status: 200,
+        success: true,
       });
-    } else {
-      res.status(200).json({ status: 200, success: true, updatedChat });
+    } else if (Group == null) {
+      if (Group) {
+        return res.json({
+          status: 400,
+          success: false,
+          msg: "The Group already exists.",
+        });
+      }
+      const updatedChat = await Chats.findByIdAndUpdate(
+        chatId,
+        {
+          chatName: chatName,
+        },
+        {
+          new: true,
+        }
+      )
+        .populate("users", "-password")
+        .populate("groupAdmin", "-password");
+
+      if (!updatedChat) {
+        res.json({
+          status: 400,
+          success: false,
+          msg: "Chat Not Found",
+        });
+      } else {
+        res
+          .status(200)
+          .json({
+            status: 200,
+            success: true,
+            msg: "Updated Profile Successfully !",
+            updatedChat,
+          });
+      }
     }
   },
   AddToGroup: async (req, res, next) => {

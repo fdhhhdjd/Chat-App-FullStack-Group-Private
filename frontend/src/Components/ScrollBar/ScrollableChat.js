@@ -8,9 +8,21 @@ import {
   isSameSenderMargin,
   isSameUser,
 } from "../../Configs/ChatLogics";
+import { useEffect, useState } from "react";
 
 const ScrollableChat = ({ messages }) => {
-  const { user } = useMyContext();
+  const { user, BoldFont, images } = useMyContext();
+  useMyContext();
+  const [a, setA] = useState();
+  useEffect(() => {
+    messages.map((m) => {
+      if (m.content.includes("https://res.cloudinary.com/taithinhnam")) {
+        const url = new URL(m.content);
+        const extension = url.pathname.split(".")[1];
+        setA(extension);
+      }
+    });
+  }, [messages, BoldFont, images]);
 
   return (
     <ScrollableFeed>
@@ -30,20 +42,58 @@ const ScrollableChat = ({ messages }) => {
                 />
               </Tooltip>
             )}
-            <span
-              style={{
-                backgroundColor: `${
-                  m.sender._id === user._id ? "#BEE3F8" : "#B9F5D0"
-                }`,
-                marginLeft: isSameSenderMargin(messages, m, i, user._id),
-                marginTop: isSameUser(messages, m, i, user._id) ? 3 : 10,
-                borderRadius: "20px",
-                padding: "5px 15px",
-                maxWidth: "75%",
-              }}
-            >
-              {m.content}
-            </span>
+
+            {m.content.includes("https://res.cloudinary.com/taithinhnam") ? (
+              m.content.includes(
+                "https://res.cloudinary.com/taithinhnam/video/upload"
+              ) ? (
+                <video
+                  controls
+                  style={{
+                    backgroundColor: `${
+                      m.sender._id === user._id ? "#BEE3F8" : "#B9F5D0"
+                    }`,
+                    marginLeft: isSameSenderMargin(messages, m, i, user._id),
+                    marginTop: isSameUser(messages, m, i, user._id) ? 3 : 10,
+                    borderRadius: "20px",
+                    padding: "5px 15px",
+                    maxWidth: "45%",
+                  }}
+                >
+                  <source src={m.content} />
+                </video>
+              ) : (
+                <img
+                  src={m.content}
+                  alt=""
+                  style={{
+                    backgroundColor: `${
+                      m.sender._id === user._id ? "#BEE3F8" : "#B9F5D0"
+                    }`,
+                    marginLeft: isSameSenderMargin(messages, m, i, user._id),
+                    marginTop: isSameUser(messages, m, i, user._id) ? 3 : 10,
+                    borderRadius: "20px",
+                    padding: "5px 15px",
+                    maxWidth: "45%",
+                  }}
+                />
+              )
+            ) : (
+              <span
+                style={{
+                  backgroundColor: `${
+                    m.sender._id === user._id ? "#BEE3F8" : "#B9F5D0"
+                  }`,
+                  marginLeft: isSameSenderMargin(messages, m, i, user._id),
+                  marginTop: isSameUser(messages, m, i, user._id) ? 3 : 10,
+                  borderRadius: "20px",
+                  padding: "5px 15px",
+                  maxWidth: "75%",
+                }}
+              >
+                {m.content}
+              </span>
+            )}
           </div>
         ))}
     </ScrollableFeed>

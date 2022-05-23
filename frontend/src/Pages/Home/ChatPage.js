@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useMyContext } from "../../useContext/GlobalState";
 import { Box } from "@chakra-ui/layout";
-import { SideDrawer, MyChats, ChatBox } from "../../Imports/index";
+import { SideDrawer, MyChats, ChatBox, MetaData } from "../../Imports/index";
 const ChatPage = () => {
   const [fetchAgain, setFetchAgain] = useState(false);
   const { user } = useMyContext();
   return (
     <React.Fragment>
+      <MetaData title="Page Chat" />
       <div style={{ width: "100%" }}>
         {user && <SideDrawer user={user} />}
         <Box

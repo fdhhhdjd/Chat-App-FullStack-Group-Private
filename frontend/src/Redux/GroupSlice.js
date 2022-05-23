@@ -64,6 +64,21 @@ export const RemoveGroupInitial = createAsyncThunk(
     return response.data;
   }
 );
+export const AccessUserToGroupInitial = createAsyncThunk(
+  "Auth/AccessUser",
+  async ({ AccessUserToGroupRoute, userId, token }) => {
+    const response = await axios.post(
+      `${AccessUserToGroupRoute}`,
+      {
+        userId,
+      },
+      {
+        headers: { Authorization: token },
+      }
+    );
+    return response.data;
+  }
+);
 
 const initialState = {
   loading: false,
@@ -115,6 +130,17 @@ const GroupSlice = createSlice({
       state.RemoveUser = action.payload;
     },
     [RemoveGroupInitial.rejected]: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    //?  Chat private User
+    [AccessUserToGroupInitial.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [AccessUserToGroupInitial.fulfilled]: (state, action) => {
+      state.loading = false;
+    },
+    [AccessUserToGroupInitial.rejected]: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },

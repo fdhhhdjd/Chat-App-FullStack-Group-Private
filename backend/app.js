@@ -26,11 +26,12 @@ app.use(
 const Users = require("./Routes/UserRoute.js");
 const Groups = require("./Routes/ChatRoute.js");
 const Messages = require("./Routes/MessageRoute.js");
-
+const upload = require("./Routes/UploadRoute");
 //!Link router Main
 app.use("/api/auth", Users);
 app.use("/api/group", Groups);
 app.use("/api/message", Messages);
-
+//!upload
+app.use("/api/upload", upload);
 //!Middleware for error
 module.exports = app;

@@ -9,10 +9,38 @@ export const FetchChatInitial = createAsyncThunk(
     return response.data;
   }
 );
+export const FetchChatIdUserInitial = createAsyncThunk(
+  "Message/FetchChatUserId",
+  async ({ MessageGetAll, chatId, token }) => {
+    const response = await axios.get(`${MessageGetAll}/${chatId}`, {
+      headers: { Authorization: token },
+    });
+    return response.data;
+  }
+);
+export const SendMessageInitial = createAsyncThunk(
+  "Message/SendMessage",
+  async ({ SendMessage, content, chatId, token }) => {
+    const response = await axios.post(
+      `${SendMessage}`,
+      {
+        content,
+        chatId,
+      },
+      {
+        headers: { Authorization: token },
+      }
+    );
+    return response.data;
+  }
+);
+
 const initialState = {
   loading: false,
   error: null,
   Message: [],
+  MessageId: [],
+  sendMessage: [],
 };
 const MessageSlice = createSlice({
   name: "Message",
@@ -28,6 +56,30 @@ const MessageSlice = createSlice({
       state.Message = action.payload;
     },
     [FetchChatInitial.rejected]: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    //?  Fetch Message Id User
+    [FetchChatIdUserInitial.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [FetchChatIdUserInitial.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.MessageId = action.payload;
+    },
+    [FetchChatIdUserInitial.rejected]: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    //? Send Message
+    [SendMessageInitial.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [SendMessageInitial.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.sendMessage = action.payload;
+    },
+    [SendMessageInitial.rejected]: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },

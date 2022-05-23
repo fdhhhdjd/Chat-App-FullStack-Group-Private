@@ -15,4 +15,11 @@ module.exports = {
 
   // Bcrypt setting
   SALT_ROUNDS: 10,
+
+  //Cloud
+  S3_BUCKET_DOCUMENTS: "document",
+  S3_BUCKET_VIDEOS: "video",
+  S3_BUCKET_IMAGES: "image",
+  S3_BUCKET_AUDIO: "audio",
+  S3_BUCKET_DATA: "data",
 };
