@@ -5,11 +5,14 @@ const cookieParser = require("cookie-parser");
 const fileUpload = require("express-fileupload");
 const cors = require("cors");
 const path = require("path");
+const compression = require("compression");
 app.enable("trust proxy");
 const bodyParser = require("body-parser");
+app.use(compression());
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors());
+// app.use(compression());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
   fileUpload({
