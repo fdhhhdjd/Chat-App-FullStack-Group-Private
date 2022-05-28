@@ -28,12 +28,13 @@ import { useMyContext } from "../../useContext/GlobalState";
 import { useDispatch } from "react-redux";
 import { IconMessage } from "../../utils/ApiRoutes";
 import { Document, Page, pdfjs } from "react-pdf";
+import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 const ScrollableChat = ({ messages }) => {
   const { user, BoldFont, images, selectedChat } = useMyContext();
   const [data, setData] = useState();
   const messageEndRef = useRef(null);
   const dispatch = useDispatch();
-  pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
+  pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
 
