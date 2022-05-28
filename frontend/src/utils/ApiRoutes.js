@@ -1,5 +1,6 @@
 //* Port
-export const host = "http://localhost:5000";
+// export const host = "http://localhost:5000";
+export const host = "https://messagesfree.herokuapp.com";
 
 //* Authentication
 //!register
