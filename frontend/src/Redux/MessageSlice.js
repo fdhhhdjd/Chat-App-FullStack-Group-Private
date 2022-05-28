@@ -20,12 +20,29 @@ export const FetchChatIdUserInitial = createAsyncThunk(
 );
 export const SendMessageInitial = createAsyncThunk(
   "Message/SendMessage",
-  async ({ SendMessage, content, chatId, token }) => {
+  async ({ SendMessage, content, chatId, time, todayDate, token }) => {
     const response = await axios.post(
       `${SendMessage}`,
       {
         content,
         chatId,
+        time,
+        date: todayDate,
+      },
+      {
+        headers: { Authorization: token },
+      }
+    );
+    return response.data;
+  }
+);
+export const IconMessageInitial = createAsyncThunk(
+  "Message/IconMessage",
+  async ({ IconMessage, id, icon, token }) => {
+    const response = await axios.post(
+      `${IconMessage}/${id}`,
+      {
+        icon,
       },
       {
         headers: { Authorization: token },
@@ -37,10 +54,12 @@ export const SendMessageInitial = createAsyncThunk(
 
 const initialState = {
   loading: false,
+  loadings: false,
   error: null,
   Message: [],
   MessageId: [],
   sendMessage: [],
+  icon: [],
 };
 const MessageSlice = createSlice({
   name: "Message",
@@ -61,14 +80,14 @@ const MessageSlice = createSlice({
     },
     //?  Fetch Message Id User
     [FetchChatIdUserInitial.pending]: (state, action) => {
-      state.loading = true;
+      state.loadings = true;
     },
     [FetchChatIdUserInitial.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadings = false;
       state.MessageId = action.payload;
     },
     [FetchChatIdUserInitial.rejected]: (state, action) => {
-      state.loading = false;
+      state.loadings = false;
       state.error = action.payload;
     },
     //? Send Message
@@ -80,6 +99,18 @@ const MessageSlice = createSlice({
       state.sendMessage = action.payload;
     },
     [SendMessageInitial.rejected]: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    //? Icon
+    [IconMessageInitial.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [IconMessageInitial.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.icon = action.payload;
+    },
+    [IconMessageInitial.rejected]: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },

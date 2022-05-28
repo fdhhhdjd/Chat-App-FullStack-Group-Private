@@ -8,6 +8,7 @@ import {
   PrivateRoute,
   PrivateRouteAuth,
 } from "./Imports/index";
+import NotFound from "./Pages/NotFound/NotFound";
 
 function App() {
   return (
@@ -20,6 +21,9 @@ function App() {
           </Route>
           <Route element={<PrivateRoute />}>
             <Route path="/chats" element={<ChatPage />} />
+          </Route>
+          <Route element={<PrivateRoute />}>
+            <Route path="/notfound" element={<NotFound />} />
           </Route>
         </Routes>
       </div>

@@ -3,7 +3,6 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 export const RegisterInitial = createAsyncThunk(
   "Auth/RegisterAuth",
   async ({ RegisterRoute, name, email, password, pic }) => {
-    console.log(RegisterRoute, name, email, password, pic);
     const response = await axios.post(RegisterRoute, {
       name,
       email,
@@ -17,6 +16,15 @@ export const LoginInitial = createAsyncThunk(
   "Auth/LoginAuth",
   async ({ LoginRoute, email, password }) => {
     const response = await axios.post(LoginRoute, { email, password });
+    return response.data;
+  }
+);
+export const LogoutInitial = createAsyncThunk(
+  "Auth/Logout",
+  async ({ LogoutRoute, user }) => {
+    const response = await axios.post(`${LogoutRoute}`, {
+      user,
+    });
     return response.data;
   }
 );
@@ -73,6 +81,17 @@ const AuthSlice = createSlice({
       state.Auth = action.payload;
     },
     [LoginInitial.rejected]: (state, action) => {
+      state.loadings = false;
+      state.error = action.payload;
+    },
+    //Login
+    [LogoutInitial.pending]: (state, action) => {
+      state.loadings = true;
+    },
+    [LogoutInitial.fulfilled]: (state, action) => {
+      state.loadings = false;
+    },
+    [LogoutInitial.rejected]: (state, action) => {
       state.loadings = false;
       state.error = action.payload;
     },

@@ -1,36 +1,38 @@
 import { ViewIcon } from "@chakra-ui/icons";
 import {
+  Box,
+  Button,
+  FormControl,
+  IconButton,
+  Input,
   Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
   ModalBody,
   ModalCloseButton,
-  Button,
-  useDisclosure,
-  FormControl,
-  Input,
-  useToast,
-  Box,
-  IconButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Spinner,
+  useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
-import { useCallback, useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useDebounce, UserBadgeItem, UserListItem } from "../../Imports/index";
 import { SearchInitial } from "../../Redux/AuthSlice";
 import {
+  AddUserToGroupInitial,
   RemoveGroupInitial,
   RenameGroupInitial,
   reset,
 } from "../../Redux/GroupSlice";
 import { useMyContext } from "../../useContext/GlobalState";
 import {
-  SearchRoute,
-  RenameGroupChatRoute,
   RemoveFromGroup,
+  RenameGroupChatRoute,
+  SearchRoute,
+  AddUserToGroup,
 } from "../../utils/ApiRoutes";
 
 const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
@@ -45,14 +47,13 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
   const [renameloading, setRenameLoading] = useState(false);
   const toast = useToast();
 
-  const { selectedChat, setSelectedChat, user } = useMyContext();
+  const { selectedChat, setSelectedChat, user, socket } = useMyContext();
   const debouncedValue = useDebounce(search, 500);
   const handleRename = async () => {
     if (!groupChatName) return;
 
     try {
       setRenameLoading(true);
-
       let token = user.token;
       let chatId = selectedChat._id;
       let chatName = groupChatName;
@@ -70,10 +71,10 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
                 position: "bottom",
               });
             }
+            onClose();
             setSelectedChat(data?.payload?.updatedChat);
             setFetchAgain(!fetchAgain);
             setRenameLoading(false);
-            onClose();
           } else if (data?.payload?.status === 400) {
             toast({
               title: "Error Occured!",
@@ -121,7 +122,6 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
       });
       return;
     }
-
     if (selectedChat.groupAdmin._id !== user._id) {
       toast({
         title: "Only admins can add someone!",
@@ -135,23 +135,16 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
 
     try {
       setLoading(true);
-      const config = {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      };
-      const { data } = await axios.put(
-        `/api/chat/groupadd`,
-        {
-          chatId: selectedChat._id,
-          userId: user1._id,
-        },
-        config
-      );
-
-      setSelectedChat(data);
-      setFetchAgain(!fetchAgain);
-      setLoading(false);
+      let chatId = selectedChat._id;
+      let userId = user1._id;
+      let token = user.token;
+      dispatch(
+        AddUserToGroupInitial({ AddUserToGroup, chatId, userId, token })
+      ).then((item) => {
+        setSelectedChat(item?.payload?.added);
+        setFetchAgain(!fetchAgain);
+        setLoading(false);
+      });
     } catch (error) {
       toast({
         title: "Error Occured!",
@@ -177,7 +170,6 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
       });
       return;
     }
-
     try {
       setLoading(true);
       let chatId = selectedChat?._id;
@@ -315,6 +307,7 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
                 placeholder="Add User to group"
                 mb={1}
                 onChange={(e) => setSearch(e.target.value)}
+                value={search}
               />
             </FormControl>
 

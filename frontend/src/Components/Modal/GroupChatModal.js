@@ -1,28 +1,28 @@
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
+  Box,
   Button,
-  useDisclosure,
   FormControl,
   Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  useDisclosure,
   useToast,
-  Box,
 } from "@chakra-ui/react";
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { useMyContext } from "../../useContext/GlobalState";
-import { UserBadgeItem, UserListItem, useDebounce } from "../../Imports/index";
-import { useDispatch, useSelector } from "react-redux";
-import { CreateGroupChatInitial } from "../../Redux/GroupSlice";
+import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useDebounce, UserBadgeItem, UserListItem } from "../../Imports/index";
 import { SearchInitial } from "../../Redux/AuthSlice";
+import { CreateGroupChatInitial } from "../../Redux/GroupSlice";
+import { useMyContext } from "../../useContext/GlobalState";
 import { CreateGroupChatRoute, SearchRoute } from "../../utils/ApiRoutes";
 const GroupChatModal = ({ children }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const fosCusSearch = useRef();
   const [groupChatName, setGroupChatName] = useState();
   const [selectedUsers, setSelectedUsers] = useState([]);
   const dispatch = useDispatch();
@@ -31,11 +31,12 @@ const GroupChatModal = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const toast = useToast();
 
-  const { user, chats, setChats } = useMyContext();
+  const { user, chats, setChats, socket } = useMyContext();
   const debouncedValue = useDebounce(search, 500);
-  const { CreateGroup } = useSelector((state) => state.group);
 
   const handleGroup = (userToAdd) => {
+    setSearch("");
+    fosCusSearch.current.focus();
     if (selectedUsers.includes(userToAdd)) {
       toast({
         title: "User already added",
@@ -51,6 +52,8 @@ const GroupChatModal = ({ children }) => {
 
   const handleDelete = (delUser) => {
     setSelectedUsers(selectedUsers.filter((user) => user._id !== delUser._id));
+    setSearch("");
+    fosCusSearch.current.focus();
   };
   const handleSubmitCreateGroup = async () => {
     if (!groupChatName || !selectedUsers) {
@@ -81,7 +84,6 @@ const GroupChatModal = ({ children }) => {
               isClosable: true,
               position: "bottom",
             });
-            onClose();
           } else if (data?.payload?.status === 400) {
             toast({
               title: "Failed to Create the Chat!",
@@ -178,6 +180,8 @@ const GroupChatModal = ({ children }) => {
                 placeholder="Add Users eg: Tai, Thinh, Nam,Tat"
                 mb={1}
                 onChange={(e) => setSearch(e.target.value)}
+                value={search}
+                ref={fosCusSearch}
               />
             </FormControl>
             <Box w="100%" d="flex" flexWrap="wrap">

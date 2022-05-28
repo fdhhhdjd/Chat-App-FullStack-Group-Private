@@ -9,7 +9,7 @@ export const RegisterRoute = `${host}/api/auth/register`;
 export const LoginRoute = `${host}/api/auth/login`;
 
 ////!logout
-export const LogoutRoute = `${host}/logout`;
+export const LogoutRoute = `${host}/api/auth/logout`;
 
 //!Search User
 export const SearchRoute = `${host}/api/auth?search=`;
@@ -21,6 +21,8 @@ export const MessageGetAll = `${host}/api/message`;
 //! Send Message
 export const SendMessage = `${host}/api/message/send`;
 
+//! Update Icon
+export const IconMessage = `${host}/api/message/icon`;
 // *Group
 //!Fetch Chat Group and Private
 export const FetchChatRoute = `${host}/api/group/fetch`;
@@ -42,3 +44,6 @@ export const AccessUserToGroupRoute = `${host}/api/group/access`;
 
 //!Upload Image Or Video
 export const UploadVideoOrImage = `${host}/api/upload/uploadImg`;
+
+//!Upload files
+export const UploadFile = `${host}/api/upload/files`;

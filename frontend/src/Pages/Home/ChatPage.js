@@ -9,15 +9,12 @@ const ChatPage = () => {
     <React.Fragment>
       <MetaData title="Page Chat" />
       <div style={{ width: "100%" }}>
-        {user && <SideDrawer user={user} />}
+        {user && <SideDrawer />}
         <Box
           d="flex"
           justifyContent="space-between"
           w="100%"
           h="91.5vh"
-          Create
-          Group
-          Chat
           p="10px"
         >
           {user && <MyChats fetchAgain={fetchAgain} />}

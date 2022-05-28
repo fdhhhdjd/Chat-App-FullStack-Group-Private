@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { LoginInitial } from "../../Redux/AuthSlice";
+import { useMyContext } from "../../useContext/GlobalState";
 import { LoginRoute } from "../../utils/ApiRoutes";
 const initialState = {
   email: "",
@@ -17,6 +18,7 @@ const Login = () => {
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
   const toast = useToast();
+  const { socket } = useMyContext();
   const [loading, setLoading] = useState(false);
   const { email, password } = state;
   const navigate = useNavigate();
@@ -84,6 +86,7 @@ const Login = () => {
     const { name, value } = e.target;
     setState({ ...state, [name]: value });
   };
+
   return (
     <VStack spacing="10px">
       <FormControl id="email" isRequired>

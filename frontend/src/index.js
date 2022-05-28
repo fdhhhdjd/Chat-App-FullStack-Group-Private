@@ -3,6 +3,8 @@ import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { BrowserRouter as Router } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
+import "tippy.js/dist/tippy.css";
+import "react-h5-audio-player/lib/styles.css";
 import App from "./App";
 import "./index.css";
 import { ChakraProvider } from "@chakra-ui/react";
@@ -11,15 +13,16 @@ import * as serviceWorker from "./serviceWorker";
 import { DataProvider } from "./useContext/GlobalState";
 ReactDOM.render(
   // <React.StrictMode>
-  <ChakraProvider>
-    <Provider store={store}>
+
+  <Provider store={store}>
+    <ChakraProvider>
       <DataProvider>
         <Router>
           <App />
         </Router>
       </DataProvider>
-    </Provider>
-  </ChakraProvider>,
+    </ChakraProvider>
+  </Provider>,
   // </React.StrictMode>,
   document.getElementById("root")
 );

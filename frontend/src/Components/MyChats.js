@@ -1,33 +1,22 @@
 import { AddIcon } from "@chakra-ui/icons";
 import { Box, Stack, Text } from "@chakra-ui/layout";
+import { Button } from "@chakra-ui/react";
 import { useToast } from "@chakra-ui/toast";
-import axios from "axios";
-import { useEffect, useState } from "react";
-import ChatLoading from "./ChatLoading";
 import moment from "moment";
-import { Button, ControlBox, cookieStorageManager } from "@chakra-ui/react";
-import { useMyContext } from "../useContext/GlobalState";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { getSender, getStatus } from "../Configs/ChatLogics";
 import { GroupChatModal } from "../Imports/index";
-import { getSender } from "../Configs/ChatLogics";
 import { FetchChatInitial } from "../Redux/MessageSlice";
-import { useDispatch, useSelector } from "react-redux";
+import { useMyContext } from "../useContext/GlobalState";
 import { FetchChatRoute } from "../utils/ApiRoutes";
+import ChatLoading from "./ChatLoading";
 const MyChats = ({ fetchAgain }) => {
   const [loggedUser, setLoggedUser] = useState();
+
   const dispatch = useDispatch();
-  const { CreateGroup } = useSelector((state) => state.group);
-  const { sendMessage } = useSelector((state) => state.message);
-  const {
-    selectedChat,
-    setSelectedChat,
-    user,
-    chats,
-    setChats,
-    notification,
-    BoldFont,
-    setBoldFont,
-    setNotification,
-  } = useMyContext();
+  const { selectedChat, setSelectedChat, user, socket, setChats, chats } =
+    useMyContext();
   const toast = useToast();
   const fetchChats = async () => {
     try {
@@ -62,7 +51,16 @@ const MyChats = ({ fetchAgain }) => {
   useEffect(() => {
     setLoggedUser(JSON.parse(localStorage.getItem("userInfo")));
     fetchChats();
-  }, [fetchAgain, CreateGroup, sendMessage, BoldFont]);
+  }, []);
+  useEffect(() => {
+    socket.on("fetch", (message) => {
+      fetchChats();
+    });
+    socket.on("new message", (message) => {
+      fetchChats();
+    });
+  }, []);
+
   return (
     <Box
       d={{ base: selectedChat ? "none" : "flex", md: "flex" }}
@@ -124,6 +122,12 @@ const MyChats = ({ fetchAgain }) => {
                   {!chat.isGroupChat
                     ? getSender(loggedUser, chat.users)
                     : `${chat.chatName} (Group)`}
+                  &nbsp;&nbsp;
+                  {getStatus(loggedUser, chat.users) == "online" ? (
+                    <i className="fas fa-circle sidebar-online-status"></i>
+                  ) : (
+                    <i className="fas fa-circle sidebar-offline-status"></i>
+                  )}
                 </Text>
                 {chat.latestMessage && (
                   <Text fontSize="xs">

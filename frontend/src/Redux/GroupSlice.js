@@ -18,12 +18,12 @@ export const CreateGroupChatInitial = createAsyncThunk(
 );
 export const AddUserToGroupInitial = createAsyncThunk(
   "Auth/AddUserToGroup",
-  async ({ CreateGroupChatRoute, name, users, token }) => {
-    const response = await axios.post(
-      `${CreateGroupChatRoute}`,
+  async ({ AddUserToGroup, chatId, userId, token }) => {
+    const response = await axios.put(
+      `${AddUserToGroup}`,
       {
-        name,
-        users,
+        chatId,
+        userId,
       },
       {
         headers: { Authorization: token },
@@ -86,6 +86,7 @@ const initialState = {
   CreateGroup: [],
   RenameGroup: [],
   RemoveUser: [],
+  addUser: [],
 };
 const GroupSlice = createSlice({
   name: "Group",
@@ -118,6 +119,18 @@ const GroupSlice = createSlice({
       state.RenameGroup = action.payload;
     },
     [RenameGroupInitial.rejected]: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    //?  Add User Group
+    [AddUserToGroupInitial.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [AddUserToGroupInitial.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.addUser = action.payload;
+    },
+    [AddUserToGroupInitial.rejected]: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },

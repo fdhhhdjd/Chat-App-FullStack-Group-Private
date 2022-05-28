@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
-const SOCKET_URL = "http://localhost:3000";
+const SOCKET_URL = "http://localhost:5000";
 export const socket = io(SOCKET_URL);
 export const Store = createContext();
 
@@ -17,9 +17,11 @@ export const DataProvider = ({ children }) => {
   //
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("userInfo"));
-    setUser(user);
-  }, []);
+    const data = JSON.parse(localStorage.getItem("userInfo"));
+    if (data) {
+      setUser(data);
+    }
+  }, [selectedChat]);
   const data = {
     user,
     setUser,

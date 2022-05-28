@@ -1,50 +1,73 @@
 import { FormControl } from "@chakra-ui/form-control";
-import { Input } from "@chakra-ui/input";
-import { Box, Text } from "@chakra-ui/layout";
-import "../../Styles/ChatBpx.css";
-import { Avatar, IconButton, Spinner, useToast } from "@chakra-ui/react";
+import { ArrowBackIcon } from "@chakra-ui/icons";
 import {
+  Input,
+  InputGroup,
+  InputLeftElement,
+  InputRightElement,
+} from "@chakra-ui/input";
+
+import { Box, Text } from "@chakra-ui/layout";
+import { Tooltip } from "@chakra-ui/tooltip";
+
+import {
+  Avatar,
+  IconButton,
+  Spinner,
+  useToast,
+  ButtonGroup,
+} from "@chakra-ui/react";
+import HeadlessTippy from "@tippyjs/react/headless";
+import axios from "axios";
+import Picker from "emoji-picker-react";
+import { useEffect, useRef, useState } from "react";
+import { BsEmojiSmileFill } from "react-icons/bs";
+import Lottie from "react-lottie";
+import { useDispatch, useSelector } from "react-redux";
+import styled from "styled-components";
+import {
+  getFormattedDate,
+  getFormattedTime,
   getSender,
   getSenderFull,
   getSenderPic,
 } from "../../Configs/ChatLogics";
-import { useEffect, useRef, useState } from "react";
-import axios from "axios";
-import { ArrowBackIcon } from "@chakra-ui/icons";
-import Lottie from "react-lottie";
-import animationData from "../../utils/animations/typing.json";
-import io from "socket.io-client";
 import {
-  UpdateGroupChatModal,
   ProfileModal,
   ScrollableChat,
+  UpdateGroupChatModal,
 } from "../../Imports/index";
-import { useMyContext } from "../../useContext/GlobalState";
-import { useDispatch } from "react-redux";
 import {
   FetchChatIdUserInitial,
   SendMessageInitial,
 } from "../../Redux/MessageSlice";
+import "../../Styles/ChatBpx.css";
+import { useMyContext } from "../../useContext/GlobalState";
+import animationData from "../../utils/animations/typing.json";
 import {
   MessageGetAll,
   SendMessage,
   UploadVideoOrImage,
+  UploadFile,
 } from "../../utils/ApiRoutes";
-const ENDPOINT = "http://localhost:5000";
-var socket, selectedChatCompare;
+var selectedChatCompare;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [messages, setMessages] = useState([]);
-  const [participation, setParticipation] = useState();
-  const [submit, setSubmit] = useState(false);
   const dispatch = useDispatch();
+  const { loadings } = useSelector((state) => state.message);
   const messageEndRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState("");
   const [socketConnected, setSocketConnected] = useState(false);
   const [typing, setTyping] = useState(false);
   const [istyping, setIsTyping] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const { socket } = useMyContext();
+  const [upFile, setUpFile] = useState();
   const toast = useToast();
+
   const defaultOptions = {
     loop: true,
     autoplay: true,
@@ -91,54 +114,73 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       });
     }
   };
+  const handleHideResult = () => {
+    setShowEmojiPicker(false);
+  };
 
   const sendMessage = async (event) => {
-    if (event.key === "Enter" && newMessage) {
-      socket.emit("stop typing", selectedChat._id);
-      try {
-        let token = user.token;
-        let content = newMessage;
-        let chatId = selectedChat;
-        dispatch(
-          SendMessageInitial({
-            SendMessage,
-            content,
-            chatId,
-            token,
-          })
-        )
-          .then((data) => {
-            socket.emit("new message", data?.payload);
-            setMessages([...messages, data?.payload]);
-            setBoldFont(!BoldFont);
-            setNewMessage("");
-            setImages("");
-          })
-          .catch((err) => {
-            toast({
-              title: "Error Occured!",
-              description: "Failed to send the Message",
-              status: "error",
-              duration: 5000,
-              isClosable: true,
-              position: "bottom",
-            });
+    socket.emit("stop typing", selectedChat._id);
+    try {
+      let token = user.token;
+      let content = event || newMessage;
+      let chatId = selectedChat;
+      let time = getFormattedTime();
+      let todayDate = getFormattedDate();
+      dispatch(
+        SendMessageInitial({
+          SendMessage,
+          content,
+          chatId,
+          time,
+          todayDate,
+          token,
+        })
+      )
+        .then((data) => {
+          setMessages([...messages, data?.payload]);
+          setBoldFont(!BoldFont);
+          setNewMessage("");
+          setImages("");
+        })
+        .catch((err) => {
+          toast({
+            title: "Error Occured!",
+            description: "Failed to send the Message",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "bottom",
           });
-      } catch (error) {
-        toast({
-          title: "Error Occured!",
-          description: "Failed to send the Message",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-          position: "bottom",
         });
+    } catch (error) {
+      toast({
+        title: "Error Occured!",
+        description: "Failed to send the Message",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+    }
+  };
+  const handleEmojiPickerhideShow = () => {
+    setShowEmojiPicker(!showEmojiPicker);
+  };
+
+  const handleEmojiClick = (event, emojiObject) => {
+    let message = newMessage;
+    message += emojiObject.emoji;
+    setNewMessage(message);
+  };
+  const sendChat = (event) => {
+    if (event.key === "Enter" && newMessage) {
+      if (newMessage.length > 0) {
+        sendMessage(msg);
+        setNewMessage("");
       }
     }
   };
-
   useEffect(() => {
-    socket = io(ENDPOINT);
     socket.emit("setup", user);
     socket.on("connected", () => setSocketConnected(true));
     socket.on("typing", () => setIsTyping(true));
@@ -150,28 +192,14 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   useEffect(() => {
     fetchMessages();
     selectedChatCompare = selectedChat;
-  }, [selectedChat, BoldFont, images]);
-
+  }, [selectedChat]);
   useEffect(() => {
-    socket.on("message recieved", (newMessageRecieved) => {
-      if (
-        !selectedChatCompare || // if chat is not selected or doesn't match current chat
-        selectedChatCompare._id !== newMessageRecieved.chat._id
-      ) {
-        if (!notification.includes(newMessageRecieved)) {
-          setNotification([newMessageRecieved, ...notification]);
-          setFetchAgain(!fetchAgain);
-          setBoldFont(!BoldFont);
-          setImages("");
-        }
-      } else {
-        setMessages([...messages, newMessageRecieved]);
-        setBoldFont(!BoldFont);
-        setImages("");
+    socket.on("fetch", (data) => {
+      if (data == "icon") {
+        fetchMessages();
       }
     });
-  }, [BoldFont, messages, images]);
-
+  }, []);
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
     if (!socketConnected) return;
@@ -190,9 +218,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       }
     }, timerLength);
   };
-  const ScrollToBottom = () => {
-    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+
   const handleUpload = async (e) => {
     e.preventDefault();
     try {
@@ -230,32 +256,75 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
       setLoading(false);
       setImages(res.data);
-      setBoldFont(!BoldFont);
       setNewMessage(images?.url);
     } catch (error) {
       toast.error(error.response.data.msg);
     }
   };
-  useEffect(() => {
-    ScrollToBottom();
-  }, [BoldFont, selectedChat, messages, images]);
+  const handleUploadFile = async (e) => {
+    e.preventDefault();
+    try {
+      const file = e.target.files[0];
+      console.log(file);
+      if (!file) {
+        return toast({
+          title: "Error Occured!",
+          description: "File not Exists",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        });
+      } else if (file.type !== "application/pdf") {
+        return toast({
+          title: "Error Occured!",
+          description: "File Support Pdf",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        });
+      }
+
+      let formData = new FormData();
+
+      formData.append("file", file);
+
+      setLoading(true);
+      const res = await axios.post(UploadFile, formData, {
+        headers: {
+          "content-type": "multipart/form-data",
+        },
+      });
+
+      setLoading(false);
+      setUpFile(res.data);
+      setNewMessage(images?.url);
+    } catch (error) {
+      toast.error(error.response.data.msg);
+    }
+  };
+
   useEffect(() => {
     if (images?.url) {
       let token = user.token;
       let content = images?.url;
       let chatId = selectedChat;
+      let time = getFormattedTime();
+      let todayDate = getFormattedDate();
       dispatch(
         SendMessageInitial({
           SendMessage,
           content,
           chatId,
+          time,
+          todayDate,
           token,
         })
       )
         .then((data) => {
           socket.emit("new message", data?.payload);
           setMessages([...messages, data?.payload]);
-          setBoldFont(!BoldFont);
           setNewMessage("");
           setImages("");
         })
@@ -271,6 +340,58 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         });
     }
   }, [images]);
+  useEffect(() => {
+    if (upFile?.url) {
+      let token = user.token;
+      let content = upFile?.url;
+      let chatId = selectedChat;
+      let time = getFormattedTime();
+      let todayDate = getFormattedDate();
+      dispatch(
+        SendMessageInitial({
+          SendMessage,
+          content,
+          chatId,
+          time,
+          todayDate,
+          token,
+        })
+      )
+        .then((data) => {
+          socket.emit("new message", data?.payload);
+          setMessages([...messages, data?.payload]);
+
+          setNewMessage("");
+          setUpFile("");
+        })
+        .catch((err) => {
+          toast({
+            title: "Error Occured!",
+            description: "Failed to send the Message",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "bottom",
+          });
+        });
+    }
+  }, [upFile]);
+  useEffect(() => {
+    socket.on("new message", (newMessageRecieved) => {
+      if (
+        !selectedChatCompare || // if chat is not selected or doesn't match current chat
+        selectedChatCompare._id !== newMessageRecieved.chat._id
+      ) {
+        if (!notification.includes(newMessageRecieved)) {
+          setNotification((prevArray) => [...prevArray, newMessageRecieved]);
+          setFetchAgain(newMessageRecieved);
+        }
+      } else {
+        setMessages((prevArray) => [...prevArray, newMessageRecieved]);
+      }
+    });
+  }, []);
+
   return (
     <>
       {selectedChat ? (
@@ -328,7 +449,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             overflowY="hidden"
             ref={messageEndRef}
           >
-            {loading ? (
+            {loadings ? (
               <Spinner
                 size="xl"
                 w={20}
@@ -337,13 +458,13 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                 margin="auto"
               />
             ) : (
-              <div className="messages" ref={messageEndRef}>
+              <div className="messages">
                 <ScrollableChat messages={messages} />
               </div>
             )}
 
             <FormControl
-              onKeyDown={sendMessage}
+              onKeyDown={(event) => sendChat(event)}
               id="first-name"
               isRequired
               mt={3}
@@ -360,20 +481,83 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
               ) : (
                 <></>
               )}
-              <Input
-                variant="filled"
-                bg="#E0E0E0"
-                placeholder="Enter a message.."
-                value={newMessage}
-                onChange={typingHandler}
-              />
-              <Input
-                variant="filled"
-                bg="#E0E0E0"
-                type="file"
-                placeholder="Enter a message.."
-                onChange={handleUpload}
-              />
+              <InputGroup size="md">
+                <Input
+                  variant="filled"
+                  bg="#E0E0E0"
+                  placeholder="Enter a message.."
+                  value={newMessage}
+                  onChange={typingHandler}
+                />
+                <InputRightElement width="4.5rem">
+                  <ButtonGroup
+                    size="sm"
+                    border="0"
+                    display="flex"
+                    pd={2}
+                    alignItems="center"
+                    justifyContent="space-evenly"
+                  >
+                    <Text>
+                      <label htmlFor="file-input" style={{ cursor: "pointer" }}>
+                        <Tooltip label="Up Pdf" aria-label="A tooltip">
+                          <i
+                            className="fa fa-plus"
+                            style={{ fontSize: "1.5rem" }}
+                          ></i>
+                        </Tooltip>
+                      </label>
+                      <input
+                        id="file-input"
+                        type="file"
+                        onChange={handleUploadFile}
+                        style={{ display: "none" }}
+                      />
+                    </Text>
+                    <Text>
+                      <label
+                        htmlFor="file-input1"
+                        style={{ cursor: "pointer" }}
+                      >
+                        <Tooltip label="Up Pdf" aria-label="A tooltip">
+                          <i
+                            className="fa fa-file"
+                            style={{ fontSize: "1.5rem" }}
+                          ></i>
+                        </Tooltip>
+                      </label>
+                      <input
+                        id="file-input1"
+                        type="file"
+                        onChange={handleUpload}
+                        style={{ display: "none" }}
+                      />
+                    </Text>
+                  </ButtonGroup>
+                  &nbsp;&nbsp; &nbsp;
+                </InputRightElement>
+
+                <InputLeftElement>
+                  <HeadlessTippy
+                    interactive
+                    visible={showEmojiPicker}
+                    onClickOutside={handleHideResult}
+                  >
+                    <Container>
+                      <div className="button-container">
+                        <div className="emoji">
+                          <BsEmojiSmileFill
+                            onClick={handleEmojiPickerhideShow}
+                          />
+                          {showEmojiPicker && (
+                            <Picker onEmojiClick={handleEmojiClick} />
+                          )}
+                        </div>
+                      </div>
+                    </Container>
+                  </HeadlessTippy>
+                </InputLeftElement>
+              </InputGroup>
             </FormControl>
           </Box>
         </>
@@ -390,3 +574,46 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 };
 
 export default SingleChat;
+const Container = styled.div`
+  .button-container {
+    display: flex;
+    align-items: center;
+    color: white;
+    gap: 1rem;
+    .emoji {
+      position: relative;
+      svg {
+        font-size: 1.5rem;
+        color: #000;
+        cursor: pointer;
+      }
+      .emoji-picker-react {
+        position: absolute;
+        top: -350px;
+
+        background-color: #080420;
+        box-shadow: 0 5px 10px #9a86f3;
+        border-color: #9a86f3;
+        .emoji-scroll-wrapper::-webkit-scrollbar {
+          background-color: #080420;
+          width: 5px;
+          &-thumb {
+            background-color: #9a86f3;
+          }
+        }
+        .emoji-categories {
+          button {
+            filter: contrast(0);
+          }
+        }
+        .emoji-search {
+          background-color: transparent;
+          border-color: #9a86f3;
+        }
+        .emoji-group:before {
+          background-color: #080420;
+        }
+      }
+    }
+  }
+`;

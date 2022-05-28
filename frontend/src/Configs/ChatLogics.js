@@ -41,10 +41,38 @@ export const isSameUser = (messages, m, i) => {
 export const getSender = (loggedUser, users) => {
   return users[0]._id === loggedUser._id ? users[1].name : users[0].name;
 };
+export const getStatus = (loggedUser, users) => {
+  return users[0]._id === loggedUser._id ? users[1].status : users[0].status;
+};
 export const getSenderPic = (loggedUser, users) => {
   return users[0]._id === loggedUser._id ? users[1].pic : users[0].pic;
 };
 
 export const getSenderFull = (loggedUser, users) => {
   return users[0]._id === loggedUser._id ? users[1] : users[0];
+};
+// Convert Date
+export const getFormattedDate = () => {
+  const date = new Date();
+  const year = date.getFullYear();
+  let month = (1 + date.getMonth()).toString();
+  month = month.length > 1 ? month : "0" + month;
+  let day = date.getDate().toString();
+  day = day.length > 1 ? day : "0" + day;
+  return month + "/" + day + "/" + year;
+};
+//Convert Time
+export const getFormattedTime = () => {
+  let today = new Date();
+  let minutes =
+    today.getMinutes() < 10 ? "0" + today.getMinutes() : today.getMinutes();
+  return today.getHours() + ":" + minutes;
+};
+//Check Link
+export const CheckLink = (text) => {
+  var urlRegex =
+    /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi;
+  return text.replace(urlRegex, function (url) {
+    return true;
+  });
 };

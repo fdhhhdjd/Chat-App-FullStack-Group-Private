@@ -18,35 +18,61 @@ import {
   DrawerHeader,
   DrawerOverlay,
 } from "@chakra-ui/modal";
+import { Stack } from "@chakra-ui/react";
 import { Spinner } from "@chakra-ui/spinner";
 import { useToast } from "@chakra-ui/toast";
 import { Tooltip } from "@chakra-ui/tooltip";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import NotificationBadge, { Effect } from "react-notification-badge";
 import { useDispatch } from "react-redux";
+import messageFacebook from "../Assets/messageFacebook.mp3";
 import { getSender } from "../Configs/ChatLogics";
-import { ChatLoading, ProfileModal, UserListItem } from "../Imports/index";
-import { SearchInitial } from "../Redux/AuthSlice";
+import {
+  ChatLoading,
+  MetaData,
+  ProfileModal,
+  UserListItem,
+} from "../Imports/index";
+import { LogoutInitial, SearchInitial } from "../Redux/AuthSlice";
 import { AccessUserToGroupInitial } from "../Redux/GroupSlice";
 import { useMyContext } from "../useContext/GlobalState";
-import { SearchRoute, AccessUserToGroupRoute } from "../utils/ApiRoutes";
-
-function SideDrawer({ user }) {
+import {
+  AccessUserToGroupRoute,
+  LogoutRoute,
+  SearchRoute,
+} from "../utils/ApiRoutes";
+function SideDrawer() {
+  const {
+    setSelectedChat,
+    notification,
+    setNotification,
+    chats,
+    setChats,
+    socket,
+    user,
+    setUser,
+  } = useMyContext();
   const [search, setSearch] = useState("");
+  const videoRef = useRef(null);
   const [searchResult, setSearchResult] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [user1, setUser1] = useState();
   const [loadingChat, setLoadingChat] = useState(false);
+  const [title, setTitle] = useState("");
+  const [flicker, setFlicker] = useState();
   const dispatch = useDispatch();
-  const { setSelectedChat, notification, setNotification, chats, setChats } =
-    useMyContext();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const logoutHandler = () => {
-    localStorage.removeItem("userInfo");
-    window.location.href = "/";
+  const LogoutHandler = async () => {
+    dispatch(LogoutInitial({ LogoutRoute, user })).then((data) => {
+      if (data?.payload?.status === true) {
+        localStorage.clear();
+        window.location.href = "/";
+      }
+    });
   };
 
-  const handleSearch = async () => {
+  const HandleSearch = async () => {
     if (!search) {
       toast({
         title: "Please Enter something in search",
@@ -88,7 +114,7 @@ function SideDrawer({ user }) {
       });
     }
   };
-  const accessChat = async (userId) => {
+  const AccessChat = async (userId) => {
     try {
       setLoadingChat(true);
       let token = user.token;
@@ -113,8 +139,48 @@ function SideDrawer({ user }) {
       });
     }
   };
+  useEffect(() => {
+    if (notification.length > 0) {
+      videoRef.current.muted = false;
+      videoRef.current.play();
+    }
+    setFlicker("");
+    if (notification.length > 0) {
+      let clear = setInterval(() => {
+        setTitle("");
+        var LearTimeOut = setTimeout(() => {
+          notification.map((notif) => setTitle(notif?.chat?.chatName));
+        }, 1000);
+        return () => {
+          clearTimeout(LearTimeOut);
+        };
+      }, 2000);
+      return () => {
+        clearInterval(clear);
+      };
+    }
+  }, [notification]);
+  useEffect(() => {
+    const data = JSON.parse(localStorage.getItem("userInfo"));
+    if (data) {
+      setUser1(data);
+    }
+  }, []);
+
   return (
     <>
+      {title === "" ? (
+        <MetaData title={`${"Chat Page"}`} />
+      ) : notification.length > 0 ? (
+        <MetaData
+          title={`${
+            title != "" && `(${notification.length}) ${title} send Message `
+          }`}
+        />
+      ) : (
+        <MetaData title={`${"Chat Page"}`} />
+      )}
+
       <Box
         d="flex"
         justifyContent="space-between"
@@ -159,7 +225,34 @@ function SideDrawer({ user }) {
                     : `New Message from ${getSender(user, notif.chat.users)}`}
                 </MenuItem>
               ))}
+
+              {notification.length > 0 && (
+                <Stack>
+                  <Button
+                    colorScheme="teal"
+                    size="xs"
+                    spacing={1}
+                    direction="row"
+                    align="center"
+                    onClick={() => {
+                      setNotification([]);
+                    }}
+                  >
+                    Clear
+                  </Button>
+                </Stack>
+              )}
             </MenuList>
+            {notification.length > 0 && (
+              <video
+                controls
+                autoPlay
+                ref={videoRef}
+                style={{ display: "none" }}
+              >
+                <source src={messageFacebook} type="video/mp4" />
+              </video>
+            )}
           </Menu>
           <Menu>
             <MenuButton as={Button} bg="white" rightIcon={<ChevronDownIcon />}>
@@ -171,11 +264,11 @@ function SideDrawer({ user }) {
               />
             </MenuButton>
             <MenuList>
-              <ProfileModal user={user}>
+              <ProfileModal user={user1}>
                 <MenuItem>My Profile</MenuItem>{" "}
               </ProfileModal>
               <MenuDivider />
-              <MenuItem onClick={logoutHandler}>Logout</MenuItem>
+              <MenuItem onClick={LogoutHandler}>Logout</MenuItem>
             </MenuList>
           </Menu>
         </div>
@@ -193,7 +286,7 @@ function SideDrawer({ user }) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-              <Button onClick={handleSearch}>Go</Button>
+              <Button onClick={HandleSearch}>Go</Button>
             </Box>
             {loading ? (
               <ChatLoading />
@@ -202,7 +295,7 @@ function SideDrawer({ user }) {
                 <UserListItem
                   key={user._id}
                   user={user}
-                  handleFunction={() => accessChat(user._id)}
+                  handleFunction={() => AccessChat(user._id)}
                 />
               ))
             )}
