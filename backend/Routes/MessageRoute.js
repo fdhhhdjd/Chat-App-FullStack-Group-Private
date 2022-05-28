@@ -5,5 +5,7 @@ const Auth = require("../middleware/Auth");
 router.get("/:chatId", Auth, messageCtrl.AllMessages);
 //Send Message
 router.post("/send", Auth, messageCtrl.SendMessage);
+// Icon Message
+router.post("/icon/:id", Auth, messageCtrl.UpDateIcon);
 
 module.exports = router;

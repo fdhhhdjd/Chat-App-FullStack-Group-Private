@@ -2,6 +2,7 @@ const Users = require("../Model/userModel");
 const bcrypt = require("bcrypt");
 const PASSWORD = require("../utils/password");
 const HELPER = require("../utils/helper");
+const socket = require("socket.io");
 const userCtrl = {
   register: async (req, res, next) => {
     try {
@@ -84,7 +85,12 @@ const userCtrl = {
           if (item) {
             user.status = "online";
             await user.save();
+            // console.log();
+            // _io.emit("new user", user);
+
             delete user.password;
+            _io.emit("fetch");
+
             res.status(200).json({
               status: 200,
               success: true,
@@ -109,6 +115,18 @@ const userCtrl = {
       );
     } catch (ex) {
       next(ex);
+    }
+  },
+  Logout: async (req, res, next) => {
+    try {
+      const { user } = req.body;
+      const users = await Users.findById(user._id);
+      users.status = "offline";
+      await users.save();
+      _io.emit("fetch");
+      return res.json({ status: true, msg: "Logout Success" });
+    } catch (ex) {
+      res.status(400).send();
     }
   },
   SearchUser: async (req, res, next) => {

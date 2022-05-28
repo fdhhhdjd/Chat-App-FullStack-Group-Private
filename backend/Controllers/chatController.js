@@ -34,6 +34,7 @@ const chatCtrl = {
       const fullGroupChat = await Chats.findOne({ _id: groupChat._id })
         .populate("users", "-password")
         .populate("groupAdmin", "-password");
+      _io.emit("fetch");
 
       res.status(200).json(fullGroupChat);
     } catch (error) {
@@ -44,6 +45,7 @@ const chatCtrl = {
   },
   RenameFromGroup: async (req, res, next) => {
     const { chatId, chatName } = req.body;
+    _io.emit("fetch");
     const Group = await Chats.findOne({ chatName });
 
     if (Group != null) {
@@ -70,7 +72,6 @@ const chatCtrl = {
       )
         .populate("users", "-password")
         .populate("groupAdmin", "-password");
-
       if (!updatedChat) {
         res.json({
           status: 400,
@@ -78,20 +79,19 @@ const chatCtrl = {
           msg: "Chat Not Found",
         });
       } else {
-        res
-          .status(200)
-          .json({
-            status: 200,
-            success: true,
-            msg: "Updated Profile Successfully !",
-            updatedChat,
-          });
+        res.status(200).json({
+          status: 200,
+          success: true,
+          msg: "Updated Group Successfully !",
+          updatedChat,
+        });
       }
     }
   },
   AddToGroup: async (req, res, next) => {
     //push them phan tu vao mang
     const { chatId, userId } = req.body;
+    console.log(chatId, userId);
 
     // check if the requester is admin
 
@@ -136,7 +136,7 @@ const chatCtrl = {
     )
       .populate("users", "-password")
       .populate("groupAdmin", "-password");
-
+    _io.emit("fetch");
     if (!removed) {
       res.json({
         status: 400,
@@ -164,6 +164,7 @@ const chatCtrl = {
             path: "latestMessage.sender",
             select: "name pic email",
           });
+          _io.emit("new user", results);
           res.status(200).json({
             status: 200,
             msg: "success",

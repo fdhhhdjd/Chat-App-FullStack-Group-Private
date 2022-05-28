@@ -8,8 +8,19 @@ const messageSchema = mongoose.Schema(
     time: {
       type: String,
     },
+    date: {
+      type: String,
+    },
+    icons: {
+      userId: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+      icon: {
+        type: Number,
+        enum: [0, 1, 2, 3, 4, 5, 6],
+      },
+    },
     readBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
+
   { timestamps: true }
 );
 

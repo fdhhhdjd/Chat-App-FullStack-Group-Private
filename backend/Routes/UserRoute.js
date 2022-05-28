@@ -9,6 +9,9 @@ router.post("/register", userCtrl.register);
 //Login
 router.post("/login", userCtrl.Login);
 
+//Logout
+router.post("/logout", userCtrl.Logout);
+
 //Search
 router.get("/", Auth, userCtrl.SearchUser);
 

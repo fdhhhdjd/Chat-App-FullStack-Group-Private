@@ -7,13 +7,14 @@ const socket = require("socket.io");
 const { json } = require("body-parser");
 const Message = require("./Model/messageModel");
 const Users = require("./Model/userModel");
+const Chats = require("./Model/chatModel");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 connectDB();
+
 if (process.env.NODE_ENV !== "PRODUCTION") {
   require("dotenv").config({ path: ".env" });
 }
-const rooms = ["general", "tech", "finance", "crypto"];
 app.get("/rooms", (req, res) => {
   res.json(rooms);
 });
@@ -37,6 +38,7 @@ const io = socket(server, {
     credentials: true,
   },
 });
+global._io = io;
 async function getLastMessageFromRoom(room) {
   let roomMessage = await Message.aggregate([
     { $match: { to: room } },
@@ -64,7 +66,6 @@ io.on("connection", (socket) => {
     socket.join(userData._id);
     socket.emit("connected");
   });
-
   socket.on("join chat", (room, user) => {
     socket.join(room);
     console.log("User Joined Room: " + room);
@@ -72,18 +73,14 @@ io.on("connection", (socket) => {
   socket.on("typing", (room) => socket.in(room).emit("typing"));
   socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
 
-  socket.on("new message", (newMessageRecieved) => {
-    var chat = newMessageRecieved.chat;
-
-    if (!chat.users) return console.log("chat.users not defined");
-
-    chat.users.forEach((user) => {
-      if (user._id == newMessageRecieved.sender._id) return;
-
-      socket.in(user._id).emit("message recieved", newMessageRecieved);
-    });
-  });
-
+  // socket.on("new message", (newMessageRecieved) => {
+  //   var chat = newMessageRecieved.chat;
+  //   if (!chat.users) return console.log("chat.users not defined");
+  //   chat.users.forEach((user) => {
+  //     if (user._id == newMessageRecieved.sender._id) return;
+  //     return socket.in(user._id).emit("message recieved", newMessageRecieved);
+  //   });
+  // });
   socket.off("setup", () => {
     console.log("USER DISCONNECTED");
     socket.leave(userData._id);
