@@ -10,8 +10,9 @@ const Users = require("./Model/userModel");
 const Chats = require("./Model/chatModel");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const os = require("os");
 connectDB();
-
+// process.env.UV_THREADPOOL_SIZE = os.cpus().length;
 if (process.env.NODE_ENV !== "PRODUCTION") {
   require("dotenv").config({ path: ".env" });
 }

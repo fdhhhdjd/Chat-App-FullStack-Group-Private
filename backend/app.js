@@ -8,7 +8,19 @@ const path = require("path");
 const compression = require("compression");
 app.enable("trust proxy");
 const bodyParser = require("body-parser");
-app.use(compression());
+app.use(
+  compression({
+    level: 6,
+    threshold: 100 * 1000,
+    filter: (req, res) => {
+      if (req.headers["x-no-compression"]) {
+        return false;
+      }
+
+      return compression.filter(req, res);
+    },
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors());
