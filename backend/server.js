@@ -35,6 +35,7 @@ const io = socket(server, {
   pingTimeout: 60000,
   cors: {
     origin: process.env.FRONT_END,
+    // credentials: true,
   },
 });
 global._io = io;
