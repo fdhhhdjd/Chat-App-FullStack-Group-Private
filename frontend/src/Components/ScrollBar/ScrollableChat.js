@@ -105,10 +105,10 @@ const ScrollableChat = ({ messages }) => {
                       justifyContent="flex-end"
                     >
                       <Badge ml="1" fontSize="1em" border="9">
-                        {m?.icons?.icon === 1 && "😄"}
-                        {m?.icons?.icon === 2 && "😍"}
-                        {m?.icons?.icon === 3 && "😡"}
-                        {m?.icons?.icon === 4 && "😭"}
+                        {m?.icons?.haha?.length > 0 && "😄"}
+                        {m?.icons?.love?.length > 0 && "😍"}
+                        {m?.icons?.hurry?.length > 0 && "😡"}
+                        {m?.icons?.like?.length > 0 && "😭"}
                       </Badge>
                     </Text>
                   )}
@@ -141,10 +141,10 @@ const ScrollableChat = ({ messages }) => {
                       justifyContent="flex-end"
                     >
                       <Badge ml="1" fontSize="1em" border="9">
-                        {m?.icons?.icon === 1 && "😄"}
-                        {m?.icons?.icon === 2 && "😍"}
-                        {m?.icons?.icon === 3 && "😡"}
-                        {m?.icons?.icon === 4 && "😭"}
+                        {m?.icons?.haha?.length > 0 && "😄"}
+                        {m?.icons?.love?.length > 0 && "😍"}
+                        {m?.icons?.hurry?.length > 0 && "😡"}
+                        {m?.icons?.like?.length > 0 && "😭"}
                       </Badge>
                     </Text>
                   )}
@@ -183,10 +183,10 @@ const ScrollableChat = ({ messages }) => {
                         justifyContent="flex-end"
                       >
                         <Badge ml="1" fontSize="1em" border="9">
-                          {m?.icons?.icon === 1 && "😄"}
-                          {m?.icons?.icon === 2 && "😍"}
-                          {m?.icons?.icon === 3 && "😡"}
-                          {m?.icons?.icon === 4 && "😭"}
+                          {m?.icons?.haha?.length > 0 && "😄"}
+                          {m?.icons?.love?.length > 0 && "😍"}
+                          {m?.icons?.hurry?.length > 0 && "😡"}
+                          {m?.icons?.like?.length > 0 && "😭"}
                         </Badge>
                       </Text>
                     )}
@@ -218,10 +218,10 @@ const ScrollableChat = ({ messages }) => {
                           justifyContent="flex-end"
                         >
                           <Badge ml="1" fontSize="1em" border="9">
-                            {m?.icons?.icon === 1 && "😄"}
-                            {m?.icons?.icon === 2 && "😍"}
-                            {m?.icons?.icon === 3 && "😡"}
-                            {m?.icons?.icon === 4 && "😭"}
+                            {m?.icons?.haha?.length > 0 && "😄"}
+                            {m?.icons?.love?.length > 0 && "😍"}
+                            {m?.icons?.hurry?.length > 0 && "😡"}
+                            {m?.icons?.like?.length > 0 && "😭"}
                           </Badge>
                         </Text>
                       )}
@@ -229,7 +229,7 @@ const ScrollableChat = ({ messages }) => {
                   ) : (
                     <>
                       {m.content}
-                      {m?.icons?.icon && (
+                      {m?.icons && (
                         <Text
                           colorScheme="blue"
                           border="0"
@@ -238,10 +238,10 @@ const ScrollableChat = ({ messages }) => {
                           justifyContent="flex-end"
                         >
                           <Badge ml="1" fontSize="1em" border="9">
-                            {m?.icons?.icon === 1 && "😄"}
-                            {m?.icons?.icon === 2 && "😍"}
-                            {m?.icons?.icon === 3 && "😡"}
-                            {m?.icons?.icon === 4 && "😭"}
+                            {m?.icons?.haha?.length > 0 && "😄"}
+                            {m?.icons?.love?.length > 0 && "😍"}
+                            {m?.icons?.hurry?.length > 0 && "😡"}
+                            {m?.icons?.like?.length > 0 && "😭"}
                           </Badge>
                         </Text>
                       )}
@@ -292,6 +292,7 @@ const ScrollableChat = ({ messages }) => {
                 </Portal>
               )}
             </Popover>
+
             <div ref={messageEndRef} />
           </div>
         ))}

@@ -73,3 +73,44 @@ const MessageCtrl = {
 };
 
 module.exports = MessageCtrl;
+
+// var message = await Messages.findById(req.params.id);
+// var user = await Users.findById(req.user._id);
+
+// if (message && user) {
+//   switch (icon) {
+//     case "1":
+//       message.icons.haha.push(req.user._id);
+//       user.icons.haha.push(req.params.id);
+
+//       break;
+//     case "2":
+//       message.icons.love.push(req.user._id);
+//       user.icons.love.push(req.params.id);
+
+//       break;
+//     case "3":
+//       message.icons.hurry.push(req.user._id);
+//       user.icons.hurry.push(req.params.id);
+
+//       break;
+//     case "4":
+//       message.icons.like.push(req.user._id);
+//       user.icons.like.push(req.params.id);
+
+//       break;
+//   }
+// }
+// await message.save();
+// await user.save();
+// res.json({
+//   status: 200,
+//   msg: "success",
+//   user,
+//   message,
+// });
+// } catch (error) {
+// res.status(400).json({
+//   msg: error.message,
+// });
+// }

@@ -16,6 +16,12 @@ const userSchema = new mongoose.Schema(
       required: true,
       default: false,
     },
+    // icons: {
+    //   love: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message" }],
+    //   haha: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message" }],
+    //   like: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message" }],
+    //   hurry: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message" }],
+    // },
     status: {
       type: String,
       default: "online",

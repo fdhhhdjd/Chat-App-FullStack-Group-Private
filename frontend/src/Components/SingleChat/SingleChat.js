@@ -197,6 +197,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     socket.on("fetch", (data) => {
       if (data == "icon") {
         fetchMessages();
+        console.log("a");
       }
     });
   }, []);
