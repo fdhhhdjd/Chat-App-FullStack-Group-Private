@@ -95,7 +95,7 @@ const Login = () => {
           value={email}
           type="email"
           name="email"
-          placeholder="Enter Your Email Address"
+          placeholder="Enter Your Email Address."
           onChange={handleChange}
         />
       </FormControl>
